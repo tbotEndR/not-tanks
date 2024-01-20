@@ -1,6 +1,10 @@
 #include "include/raylib.h"
 #include "include/raymath.h"
+#include "include/projectiles.h"
 #include <stdio.h>
+#include <stdlib.h>
+#define MAX_PROJECTILES 500
+
 //----------------------------------------------------------------------------------
 // Local Variables Definition (local to this module)
 //----------------------------------------------------------------------------------
@@ -15,13 +19,13 @@ Vector3 xzPlaneVector2 = { 0.0f, 0.0f, 1.0f };
 Vector3 xzNormalvector = { 1.0f, 0.0f, 1.0f };
 char buf1[50];
 char buf2[50];
-
+char buf3[50];
 
 
 //----------------------------------------------------------------------------------
 // Local Functions Declaration
 //----------------------------------------------------------------------------------
-static void UpdateDrawFrame(void);          // Update and draw one frame
+static void UpdateDrawFrame(projectilePool *p);          // Update and draw one frame
 Vector3 GetMouseWorldPosition(Ray *mouseRay);
 
 //----------------------------------------------------------------------------------
@@ -31,8 +35,8 @@ int main()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 1920;
-    const int screenHeight = 1080;
+    const int screenWidth = 1280;
+    const int screenHeight = 720;
 
     InitWindow(screenWidth, screenHeight, "-not-tanks!-");
 
@@ -41,6 +45,7 @@ int main()
     camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
     camera.fovy = 45.0f;
     camera.projection = CAMERA_PERSPECTIVE;
+    projectilePool *playerProjectiles = PoolCtor(MAX_PROJECTILES);
 
     //--------------------------------------------------------------------------------------
 
@@ -50,18 +55,25 @@ int main()
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        if (IsKeyDown(KEY_D)) cubePosition.x += 1;
-        else if (IsKeyDown(KEY_A)) cubePosition.x -= 1;
+        sprintf(buf1, "nextfree: 0x%d", playerProjectiles->nextFree);
+        sprintf(buf2, "pool: 0x%d", playerProjectiles->pool);
+        sprintf(buf3, "pool end: 0x%d", playerProjectiles->arrEnd);
+
+        mouseRay = GetMouseRay(GetMousePosition(), camera);
+        mouseWorldPosition = GetMouseWorldPosition(&mouseRay);
+        UpdateProjectilePosition(playerProjectiles);
+
+        if (IsKeyDown(KEY_D)) cubePosition.x -= 1;
+        else if (IsKeyDown(KEY_A)) cubePosition.x += 1;
         if (IsKeyDown(KEY_W)) cubePosition.z += 1;
         else if (IsKeyDown(KEY_S)) cubePosition.z -= 1;
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
-            mouseRay = GetMouseRay(GetMousePosition(), camera);
-            mouseWorldPosition = GetMouseWorldPosition(&mouseRay);
+            NewProjectile(playerProjectiles, cubePosition, Vector3Subtract(mouseWorldPosition, cubePosition));
         } 
+        if (IsKeyPressed(KEY_R)) FreeProjectiles(playerProjectiles);
 
-        sprintf(buf1, "FrameTime: %.2fms", GetFrameTime()*1000.0f);
-        UpdateDrawFrame();
+        UpdateDrawFrame(playerProjectiles);
     }
 
     // De-Initialization
@@ -73,7 +85,7 @@ int main()
 }
 
 // Update and draw game frame
-static void UpdateDrawFrame(void)
+static void UpdateDrawFrame(projectilePool *p)
 {
     // Update
     //----------------------------------------------------------------------------------
@@ -90,12 +102,18 @@ static void UpdateDrawFrame(void)
             DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, RED);
             DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
             DrawGrid(50, 2.0f);
+            for (int i = 0; i < MAX_PROJECTILES; i++)
+            {
+                if (p->pool[i].active == '1') DrawSphere(p->pool[i].position, 0.3f, LIGHTGRAY);
+            }            
 
         EndMode3D();
 
         DrawText("This is a raylib example", 10, 40, 20, DARKGRAY);
-        DrawText(buf1, 10, 70, 20, DARKGRAY);
-        DrawText(buf2, 10, 100, 20, DARKGRAY);
+        DrawText(buf2, 10, 70, 10, DARKGRAY);
+        DrawText(buf1, 10, 100, 10, DARKGRAY);
+        DrawText(buf3, 10, 130, 10, DARKGRAY);
+
 
         DrawFPS(10, 10);
 
