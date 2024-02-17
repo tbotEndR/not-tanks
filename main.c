@@ -1,6 +1,6 @@
-#include "include/raylib.h"
-#include "include/raymath.h"
-#include "include/projectiles.h"
+#include "raylib.h"
+#include "raymath.h"
+#include "projectiles.h"
 #include <stdio.h>
 #include <stdlib.h>
 #define MAX_PROJECTILES 500
@@ -55,9 +55,9 @@ int main()
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        sprintf(buf1, "nextfree: 0x%d", playerProjectiles->nextFree);
-        sprintf(buf2, "pool: 0x%d", playerProjectiles->pool);
-        sprintf(buf3, "pool end: 0x%d", playerProjectiles->arrEnd);
+        sprintf(buf1, "nextfree: 0x%p", playerProjectiles->nextFree);
+        sprintf(buf2, "pool: 0x%p", playerProjectiles->pool);
+        sprintf(buf3, "pool end: 0x%p", playerProjectiles->arrEnd);
 
         mouseRay = GetMouseRay(GetMousePosition(), camera);
         mouseWorldPosition = GetMouseWorldPosition(&mouseRay);
