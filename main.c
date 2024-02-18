@@ -3,7 +3,7 @@
 #include "projectiles.h"
 #include <stdio.h>
 #include <stdlib.h>
-#define MAX_PROJECTILES 500
+#define MAX_PROJECTILES 100
 
 //----------------------------------------------------------------------------------
 // Local Variables Definition (local to this module)
@@ -51,7 +51,6 @@ int main()
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
-
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
@@ -67,7 +66,7 @@ int main()
         else if (IsKeyDown(KEY_A)) cubePosition.x += 1;
         if (IsKeyDown(KEY_W)) cubePosition.z += 1;
         else if (IsKeyDown(KEY_S)) cubePosition.z -= 1;
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
             NewProjectile(playerProjectiles, cubePosition, Vector3Subtract(mouseWorldPosition, cubePosition));
         } 

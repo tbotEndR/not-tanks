@@ -7,7 +7,7 @@ projectilePool *PoolCtor(int size)
     newPool->pool = (projectile*) malloc(sizeof(projectile) * size);
     newPool->size = size;
     newPool->nextFree = newPool->pool;
-    newPool->arrEnd = newPool->pool + (size-1) * sizeof(projectile);
+    newPool->arrEnd = newPool->pool + (size-1);
     for (int i = 0; i < size; i++)
     {
         newPool->pool[i].active = '0';
@@ -25,7 +25,7 @@ void NewProjectile(projectilePool *pool, Vector3 position, Vector3 direction)
         pool->nextFree->position = position;
         do
         {
-            pool->nextFree++;
+            (pool->nextFree)++;
             if (pool->nextFree > pool->arrEnd) 
             {
                 pool->nextFree = NULL;
@@ -54,6 +54,6 @@ void UpdateProjectilePosition(projectilePool *pool)
 {
    for (int i = 0; i < pool->size; i++)
    {
-        if (pool->pool[i].active == '1') pool->pool[i].position = Vector3Add(pool->pool[i].position, Vector3Scale(Vector3Normalize(pool->pool[i].direction), 0.25f));
+        if (pool->pool[i].active == '1') pool->pool[i].position = Vector3Add(pool->pool[i].position, Vector3Scale(Vector3Normalize(pool->pool[i].direction), 0.1f));
    }
 }
