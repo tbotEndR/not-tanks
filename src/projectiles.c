@@ -1,10 +1,10 @@
 #include "include/projectiles.h"
 
 //  allocates a projectile pool of given size
-projectilePool *PoolCtor(int size)
+ProjectilePool *PoolCtor(int size)
 {
-    projectilePool *newPool = (projectilePool*) malloc(sizeof(projectilePool));
-    newPool->pool = (projectile*) malloc(sizeof(projectile) * size);
+    ProjectilePool *newPool = (ProjectilePool*) malloc(sizeof(ProjectilePool));
+    newPool->pool = (Projectile*) malloc(sizeof(Projectile) * size);
     newPool->size = size;
     newPool->nextFree = newPool->pool;
     newPool->arrEnd = newPool->pool + (size-1);
@@ -15,8 +15,8 @@ projectilePool *PoolCtor(int size)
     return newPool;
 }
 
-//  creates new projectile if there is a free position in the array
-void NewProjectile(projectilePool *pool, Vector3 position, Vector3 direction)
+//  creates new Projectile if there is a free position in the array
+void NewProjectile(ProjectilePool *pool, Vector3 position, Vector3 direction)
 {
     if (pool->nextFree != NULL)
     {
@@ -36,19 +36,19 @@ void NewProjectile(projectilePool *pool, Vector3 position, Vector3 direction)
     }
 }
 
-void PoolDtor(projectilePool* pool)
+void PoolDtor(ProjectilePool* pool)
 {
     free(pool->pool);
     free(pool);
 }
 
-void DeleteProjectile(projectilePool *pool, projectile *p)
+void DeleteProjectile(ProjectilePool *pool, Projectile *p)
 {
     p->active = '0';
     if ((p < pool->nextFree) || (pool->nextFree == NULL)) pool->nextFree = p;
 }
 
-void FreeProjectiles(projectilePool *pool)
+void FreeProjectiles(ProjectilePool *pool)
 {
     for (int i = 0; i < pool->size; i++)
     {
@@ -56,7 +56,7 @@ void FreeProjectiles(projectilePool *pool)
     }
 }
 
-void UpdateProjectilePosition(projectilePool *pool)
+void UpdateProjectilePosition(ProjectilePool *pool)
 {
    for (int i = 0; i < pool->size; i++)
    {

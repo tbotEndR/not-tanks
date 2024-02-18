@@ -4,24 +4,24 @@
 #include "raymath.h"
 #include <stdlib.h>
 
-typedef struct projectile{
+typedef struct Projectile{
     Vector3 position;
     Vector3 direction;
     char active;
-} projectile;
+} Projectile;
 
-typedef struct projectilePool{
+typedef struct ProjectilePool{
     int size;
-    projectile *pool;
-    projectile *nextFree;
-    projectile *arrEnd;
-} projectilePool;
+    Projectile *pool;
+    Projectile *nextFree;
+    Projectile *arrEnd;
+} ProjectilePool;
 
-projectilePool *PoolCtor(int size);
-void PoolDtor(projectilePool* pool);
-void NewProjectile(projectilePool *pool, Vector3 position, Vector3 direction);
-void DeleteProjectile(projectilePool *pool, projectile *p);
-void FreeProjectiles(projectilePool *pool);
-void UpdateProjectilePosition(projectilePool *pool);
+ProjectilePool *PoolCtor(int size);
+void PoolDtor(ProjectilePool* pool);
+void NewProjectile(ProjectilePool *pool, Vector3 position, Vector3 direction);
+void DeleteProjectile(ProjectilePool *pool, Projectile *p);
+void FreeProjectiles(ProjectilePool *pool);
+void UpdateProjectilePosition(ProjectilePool *pool);
 
 #endif

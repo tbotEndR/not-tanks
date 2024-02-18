@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "projectiles.h"
+#include "arena.h"
 #include <stdio.h>
 #include <stdlib.h>
 #define MAX_PROJECTILES 100
@@ -21,11 +22,12 @@ char buf1[50];
 char buf2[50];
 char buf3[50];
 
+Cell c1 = { 2.0f, 15.0f, 10.0f, WALL_SOLID};
 
 //----------------------------------------------------------------------------------
 // Local Functions Declaration
 //----------------------------------------------------------------------------------
-static void UpdateDrawFrame(projectilePool *p);          // Update and draw one frame
+static void UpdateDrawFrame(ProjectilePool *p);          // Update and draw one frame
 Vector3 GetMouseWorldPosition(Ray *mouseRay);
 
 //----------------------------------------------------------------------------------
@@ -45,12 +47,13 @@ int main()
     camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
     camera.fovy = 45.0f;
     camera.projection = CAMERA_PERSPECTIVE;
-    projectilePool *playerProjectiles = PoolCtor(MAX_PROJECTILES);
+    ProjectilePool *playerProjectiles = PoolCtor(MAX_PROJECTILES);
+
 
     //--------------------------------------------------------------------------------------
-
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
+
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
@@ -77,6 +80,7 @@ int main()
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
+    PoolDtor(playerProjectiles);
     CloseWindow();                  // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
@@ -84,7 +88,7 @@ int main()
 }
 
 // Update and draw game frame
-static void UpdateDrawFrame(projectilePool *p)
+static void UpdateDrawFrame(ProjectilePool *p)
 {
     // Update
     //----------------------------------------------------------------------------------
@@ -101,6 +105,7 @@ static void UpdateDrawFrame(projectilePool *p)
             DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, RED);
             DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
             DrawGrid(50, 2.0f);
+            DrawCubeWires((Vector3){c1.xCoord, 1.0f, c1.yCoord}, c1.size, c1.size, c1.size, GRAY);
             for (int i = 0; i < MAX_PROJECTILES; i++)
             {
                 if (p->pool[i].active == '1') DrawSphere(p->pool[i].position, 0.3f, LIGHTGRAY);
