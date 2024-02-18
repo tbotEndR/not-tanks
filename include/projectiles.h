@@ -18,6 +18,7 @@ typedef struct projectilePool{
 } projectilePool;
 
 projectilePool *PoolCtor(int size);
+void PoolDtor(projectilePool* pool);
 void NewProjectile(projectilePool *pool, Vector3 position, Vector3 direction);
 void DeleteProjectile(projectilePool *pool, projectile *p);
 void FreeProjectiles(projectilePool *pool);

@@ -36,6 +36,12 @@ void NewProjectile(projectilePool *pool, Vector3 position, Vector3 direction)
     }
 }
 
+void PoolDtor(projectilePool* pool)
+{
+    free(pool->pool);
+    free(pool);
+}
+
 void DeleteProjectile(projectilePool *pool, projectile *p)
 {
     p->active = '0';
