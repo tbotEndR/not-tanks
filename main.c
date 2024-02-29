@@ -22,7 +22,7 @@ char buf1[50];
 char buf2[50];
 char buf3[50];
 
-Cell c1 = { 2.0f, 15.0f, 10.0f, WALL_SOLID};
+Arena arena1 
 
 //----------------------------------------------------------------------------------
 // Local Functions Declaration
@@ -46,7 +46,7 @@ int main()
     camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
     camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
     camera.fovy = 45.0f;
-    camera.projection = CAMERA_PERSPECTIVE;
+    camera.projection = CAMERA_ORTHOGRAPHIC;
     ProjectilePool *playerProjectiles = PoolCtor(MAX_PROJECTILES);
 
 
@@ -105,7 +105,8 @@ static void UpdateDrawFrame(ProjectilePool *p)
             DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, RED);
             DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
             DrawGrid(50, 2.0f);
-            DrawCubeWires((Vector3){c1.xCoord, 1.0f, c1.yCoord}, c1.size, c1.size, c1.size, GRAY);
+            DrawArena(arena1);
+            DrawCubeWires(c1.centerCoords, c1.size, c1.size, c1.size, GRAY);
             for (int i = 0; i < MAX_PROJECTILES; i++)
             {
                 if (p->pool[i].active == '1') DrawSphere(p->pool[i].position, 0.3f, LIGHTGRAY);
