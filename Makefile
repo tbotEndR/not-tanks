@@ -26,7 +26,7 @@
 # Define required raylib variables
 PROJECT_NAME       ?= not-tanks
 RAYLIB_VERSION     ?= 5.0
-RAYLIB_PATH        ?= /home/tbot/raylib
+RAYLIB_PATH        ?= C:/raylib-5.0
 
 # Define compiler path on Windows
 COMPILER_PATH      ?= C:/raylib/w64devkit/bin
@@ -249,7 +249,7 @@ endif
 
 # Define include paths for required headers
 # NOTE: Several external required libraries (stb and others)
-INCLUDE_PATHS = -I. -I$(RAYLIB_PATH)/src -I$(RAYLIB_PATH)/src/external
+INCLUDE_PATHS = -I. -I$(RAYLIB_PATH)/src -I$(RAYLIB_PATH)/src/external -Iinclude/
 
 # Define additional directories containing required header files
 ifeq ($(PLATFORM),PLATFORM_RPI)
