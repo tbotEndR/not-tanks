@@ -22,12 +22,10 @@ char buf1[50];
 char buf2[50];
 char buf3[50];
 
-Arena arena1 
-
 //----------------------------------------------------------------------------------
 // Local Functions Declaration
 //----------------------------------------------------------------------------------
-static void UpdateDrawFrame(ProjectilePool *p);          // Update and draw one frame
+static void UpdateDrawFrame(ProjectilePool *p, Arena *a);          // this is terrible, fix it pls
 Vector3 GetMouseWorldPosition(Ray *mouseRay);
 
 //----------------------------------------------------------------------------------
@@ -48,7 +46,7 @@ int main()
     camera.fovy = 45.0f;
     camera.projection = CAMERA_ORTHOGRAPHIC;
     ProjectilePool *playerProjectiles = PoolCtor(MAX_PROJECTILES);
-
+    Arena* test_arena = ArenaCtor(78, 50, 2.0f);
 
     //--------------------------------------------------------------------------------------
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
@@ -57,9 +55,7 @@ int main()
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        sprintf(buf1, "nextfree: 0x%p", playerProjectiles->nextFree);
-        sprintf(buf2, "pool: 0x%p", playerProjectiles->pool);
-        sprintf(buf3, "pool end: 0x%p", playerProjectiles->arrEnd);
+        sprintf(buf1, "playerCoordinates: [%.2f %.2f %.2f]", cubePosition.x, cubePosition.y, cubePosition.z);
 
         mouseRay = GetMouseRay(GetMousePosition(), camera);
         mouseWorldPosition = GetMouseWorldPosition(&mouseRay);
@@ -69,18 +65,21 @@ int main()
         else if (IsKeyDown(KEY_A)) cubePosition.x += 1;
         if (IsKeyDown(KEY_W)) cubePosition.z += 1;
         else if (IsKeyDown(KEY_S)) cubePosition.z -= 1;
+        if (IsKeyPressed(KEY_SPACE)) cubePosition = (Vector3) { 0.0f, 1.0f, 0.0f};
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
             NewProjectile(playerProjectiles, cubePosition, Vector3Subtract(mouseWorldPosition, cubePosition));
         } 
         if (IsKeyPressed(KEY_R)) FreeProjectiles(playerProjectiles);
 
-        UpdateDrawFrame(playerProjectiles);
+        camera.target = cubePosition;
+        UpdateDrawFrame(playerProjectiles, test_arena);
     }
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
     PoolDtor(playerProjectiles);
+    ArenaDtor(test_arena);
     CloseWindow();                  // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
@@ -88,7 +87,7 @@ int main()
 }
 
 // Update and draw game frame
-static void UpdateDrawFrame(ProjectilePool *p)
+static void UpdateDrawFrame(ProjectilePool *p, Arena *a)
 {
     // Update
     //----------------------------------------------------------------------------------
@@ -105,8 +104,7 @@ static void UpdateDrawFrame(ProjectilePool *p)
             DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, RED);
             DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
             DrawGrid(50, 2.0f);
-            DrawArena(arena1);
-            DrawCubeWires(c1.centerCoords, c1.size, c1.size, c1.size, GRAY);
+            DrawArena(a);
             for (int i = 0; i < MAX_PROJECTILES; i++)
             {
                 if (p->pool[i].active == '1') DrawSphere(p->pool[i].position, 0.3f, LIGHTGRAY);
@@ -115,10 +113,7 @@ static void UpdateDrawFrame(ProjectilePool *p)
         EndMode3D();
 
         DrawText("This is a raylib example", 10, 40, 20, DARKGRAY);
-        DrawText(buf2, 10, 70, 10, DARKGRAY);
-        DrawText(buf1, 10, 100, 10, DARKGRAY);
-        DrawText(buf3, 10, 130, 10, DARKGRAY);
-
+        DrawText(buf1, 10, 70, 10, DARKGRAY);
 
         DrawFPS(10, 10);
 

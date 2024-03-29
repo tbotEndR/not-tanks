@@ -2,3 +2,4 @@ not-tanks
 .vscode/*
 resources/*
 main.code-workspace
+/*.exe
