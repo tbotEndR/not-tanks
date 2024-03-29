@@ -78,7 +78,7 @@ void CheckProjectileCollision(ProjectilePool *pool)
             else if ((pool->pool[i].position.z >= 24.0f) || (pool->pool[i].position.z <= -24.0f)) pool->pool[i].direction.z *= -1;
 
             // check for collisions with other projectiles
-            for (int f = i+1; f < pool->size; f++)
+            /*for (int f = i+1; f < pool->size; f++)
             {
                 if (pool->pool[f].active == '1')
                 {
@@ -89,7 +89,7 @@ void CheckProjectileCollision(ProjectilePool *pool)
                         break;
                     }
                 }
-            }
+            }*/
         }
     }
 }

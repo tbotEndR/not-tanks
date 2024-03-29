@@ -1,6 +1,7 @@
 TODO:
  - map drawing offset isn't working ✔
- - bullet ricochet
-  - figure out why it works sometimes and not others, why bullets just disappear sometimes
+ - bullets ricochet off walls ✔
+ - bullet collisions despawn both bullets
+ - bullets ricochet off random arena blocks
  - time step
  - destructible blocks
