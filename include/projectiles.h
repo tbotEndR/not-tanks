@@ -12,6 +12,7 @@ typedef struct Projectile{
 
 typedef struct ProjectilePool{
     int size;
+    int actives;
     Projectile *pool;
     Projectile *nextFree;
     Projectile *arrEnd;
@@ -21,7 +22,9 @@ ProjectilePool *PoolCtor(int size);
 void PoolDtor(ProjectilePool* pool);
 void NewProjectile(ProjectilePool *pool, Vector3 position, Vector3 direction);
 void DeleteProjectile(ProjectilePool *pool, Projectile *p);
-void FreeProjectiles(ProjectilePool *pool);
+void DeleteAllProjectiles(ProjectilePool *pool);
 void UpdateProjectilePosition(ProjectilePool *pool);
+void CheckProjectileCollision(ProjectilePool *pool);
+void DrawProjectiles(ProjectilePool *pool);
 
 #endif

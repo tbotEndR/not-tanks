@@ -55,24 +55,29 @@ int main()
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        sprintf(buf1, "playerCoordinates: [%.2f %.2f %.2f]", cubePosition.x, cubePosition.y, cubePosition.z);
+        sprintf(buf1, "actives: %d", playerProjectiles->actives);
+        sprintf(buf2, "nextFree:%p", playerProjectiles->nextFree);
+        sprintf(buf3, "arrEnd:%p", playerProjectiles->arrEnd);
 
         mouseRay = GetMouseRay(GetMousePosition(), camera);
         mouseWorldPosition = GetMouseWorldPosition(&mouseRay);
         UpdateProjectilePosition(playerProjectiles);
+        // UpdatePlayer();
 
         if (IsKeyDown(KEY_D)) cubePosition.x -= 1;
         else if (IsKeyDown(KEY_A)) cubePosition.x += 1;
         if (IsKeyDown(KEY_W)) cubePosition.z += 1;
         else if (IsKeyDown(KEY_S)) cubePosition.z -= 1;
         if (IsKeyPressed(KEY_SPACE)) cubePosition = (Vector3) { 0.0f, 1.0f, 0.0f};
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
-            NewProjectile(playerProjectiles, cubePosition, Vector3Subtract(mouseWorldPosition, cubePosition));
+            Vector3 projectileDirection = Vector3Subtract(mouseWorldPosition, cubePosition);
+            NewProjectile(playerProjectiles, Vector3Add(cubePosition, Vector3Scale(Vector3Normalize(projectileDirection), 1.0f)), projectileDirection);
         } 
-        if (IsKeyPressed(KEY_R)) FreeProjectiles(playerProjectiles);
+        if (IsKeyPressed(KEY_R)) DeleteAllProjectiles(playerProjectiles);
 
-        camera.target = cubePosition;
+        CheckProjectileCollision(playerProjectiles);
+
         UpdateDrawFrame(playerProjectiles, test_arena);
     }
 
@@ -105,15 +110,13 @@ static void UpdateDrawFrame(ProjectilePool *p, Arena *a)
             DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
             DrawGrid(50, 2.0f);
             DrawArena(a);
-            for (int i = 0; i < MAX_PROJECTILES; i++)
-            {
-                if (p->pool[i].active == '1') DrawSphere(p->pool[i].position, 0.3f, LIGHTGRAY);
-            }            
+            DrawProjectiles(p);           
 
         EndMode3D();
 
-        DrawText("This is a raylib example", 10, 40, 20, DARKGRAY);
         DrawText(buf1, 10, 70, 10, DARKGRAY);
+        DrawText(buf2, 10, 90, 10, DARKGRAY);
+        DrawText(buf3, 10, 110, 10, DARKGRAY);
 
         DrawFPS(10, 10);
 

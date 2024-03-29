@@ -1,2 +1,6 @@
 TODO:
  - map drawing offset isn't working ✔
+ - bullet ricochet
+  - figure out why it works sometimes and not others, why bullets just disappear sometimes
+ - time step
+ - destructible blocks
