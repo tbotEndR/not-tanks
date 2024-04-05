@@ -1,4 +1,5 @@
 #include "include/projectiles.h"
+#include <math.h>
 
 //  allocates a projectile pool of given size
 ProjectilePool *PoolCtor(int size)
@@ -12,6 +13,7 @@ ProjectilePool *PoolCtor(int size)
     for (int i = 0; i < size; i++)
     {
         newPool->pool[i].active = '0';
+        newPool->pool[i].lives = 0;
     }
     return newPool;
 }
@@ -22,7 +24,8 @@ void NewProjectile(ProjectilePool *pool, Vector3 position, Vector3 direction)
     if (pool->nextFree != NULL)
     {
         pool->nextFree->active = '1';
-        pool->nextFree->direction = direction;
+        pool->nextFree->lives = 2;
+        pool->nextFree->direction = Vector3Scale(Vector3Normalize(direction), 0.1f);
         pool->nextFree->position = position;
         pool->actives++;
         do
@@ -47,6 +50,7 @@ void PoolDtor(ProjectilePool* pool)
 void DeleteProjectile(ProjectilePool *pool, Projectile *p)
 {
     p->active = '0';
+    p->lives = 0;
     pool->actives--;
     if ((p < pool->nextFree) || (pool->nextFree == NULL)) pool->nextFree = p;
 }
@@ -61,46 +65,60 @@ void DeleteAllProjectiles(ProjectilePool *pool)
 
 void UpdateProjectilePosition(ProjectilePool *pool)
 {
-   for (int i = 0; i < pool->size; i++)
-   {
-        if (pool->pool[i].active == '1') pool->pool[i].position = Vector3Add(pool->pool[i].position, Vector3Scale(Vector3Normalize(pool->pool[i].direction), 0.1f));
-   }
+    for (int i = 0, counter = 0; (i < pool->size) && (counter < pool->actives); i++)
+    {
+        if (counter >= pool->actives) break;
+        if (pool->pool[i].active == '1')
+        {
+            pool->pool[i].position = Vector3Add(pool->pool[i].position, pool->pool[i].direction);
+            counter++;
+        } 
+    }
 }
 
 void CheckProjectileCollision(ProjectilePool *pool)
 {
-    for (int i = 0; (i < pool->size) && (i+1 < pool->actives); i++)
+    for (int i = 0, counter = 0; (i < pool->size) && (counter < pool->actives); i++)
     {
         if (pool->pool[i].active == '1') 
         {
             // rudimentary check for wall collision and ricochet
-            if ((pool->pool[i].position.x >= 38.0f) || (pool->pool[i].position.x <= -38.0f)) pool->pool[i].direction.x *= -1;
-            else if ((pool->pool[i].position.z >= 24.0f) || (pool->pool[i].position.z <= -24.0f)) pool->pool[i].direction.z *= -1;
+            if ((pool->pool[i].position.x >= 38.0f) || (pool->pool[i].position.x <= -38.0f)) 
+            {
+                if (pool->pool[i].lives == 1) DeleteProjectile(pool, &pool->pool[i]);
+                else
+                {   
+                    pool->pool[i].direction.x *= -1;
+                    pool->pool[i].lives--;
+                }
+            }
+            if ((pool->pool[i].position.z >= 24.0f) || (pool->pool[i].position.z <= -24.0f)) 
+            {
+                if (pool->pool[i].lives == 1) DeleteProjectile(pool, &pool->pool[i]);
+                else
+                {   
+                    pool->pool[i].direction.z *= -1;
+                    pool->pool[i].lives--;
+                }
+            }
 
             // check for collisions with other projectiles
-            /*for (int f = i+1; f < pool->size; f++)
-            {
-                if (pool->pool[f].active == '1')
-                {
-                    if ((pool->pool[i].position.x - pool->pool[f].position.x <= 0.1f) && (pool->pool[i].position.z - pool->pool[f].position.z <= 0.1f))
-                    {
-                        DeleteProjectile(pool, &(pool->pool[f]));
-                        DeleteProjectile(pool, &(pool->pool[i]));
-                        break;
-                    }
-                }
-            }*/
+           counter++;
         }
     }
 }
 
 void DrawProjectiles(ProjectilePool *pool)
 {
-    for (int i = 0; (i < pool->size) && (i+1 < pool->actives); i++)
+    for (int i = 0, counter = 0; (i < pool->size) && (counter < pool->actives); i++)
     {
         if (pool->pool[i].active == '1') 
         {
-            DrawSphere(pool->pool[i].position, 0.3f, LIGHTGRAY);
+            //DrawSphere(pool->pool[i].position, 0.3f, LIGHTGRAY);
+            DrawCube(pool->pool[i].position, 0.3f, 0.3f, 0.3f, LIGHTGRAY);
+            DrawCubeWires(pool->pool[i].position, 0.3f, 0.3f, 0.3f, RED);
+
+            counter++;
         }
     }
 }

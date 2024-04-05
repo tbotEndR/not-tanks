@@ -7,6 +7,7 @@
 typedef struct Projectile{
     Vector3 position;
     Vector3 direction;
+    int lives;
     char active;
 } Projectile;
 

@@ -52,7 +52,7 @@ void DrawArena(Arena *arena)
                 switch(arena->grid[i][f].type)
                 {
                     case WALL_SOLID:
-                        //DrawCube(arena->grid[i][f].centerCoords, arena->cellsize, arena->cellsize, arena->cellsize, BEIGE);
+                        DrawCube(arena->grid[i][f].centerCoords, arena->cellsize, arena->cellsize, arena->cellsize, BEIGE);
                         DrawCubeWires(arena->grid[i][f].centerCoords, arena->cellsize, arena->cellsize, arena->cellsize, DARKGRAY);
                         break;
                     case WALL_DEST:

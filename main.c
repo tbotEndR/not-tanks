@@ -4,7 +4,8 @@
 #include "arena.h"
 #include <stdio.h>
 #include <stdlib.h>
-#define MAX_PROJECTILES 100
+#include <sys/time.h>
+#define MAX_PROJECTILES 500
 
 //----------------------------------------------------------------------------------
 // Local Variables Definition (local to this module)
@@ -47,21 +48,22 @@ int main()
     camera.projection = CAMERA_ORTHOGRAPHIC;
     ProjectilePool *playerProjectiles = PoolCtor(MAX_PROJECTILES);
     Arena* test_arena = ArenaCtor(78, 50, 2.0f);
+    struct timeval begin, end;
+    long deltatime = 0.0f;
+    long timecounter = 0.0f;
 
     //--------------------------------------------------------------------------------------
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
     // Main game loop
+    gettimeofday(&begin, 0);
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
         sprintf(buf1, "actives: %d", playerProjectiles->actives);
-        sprintf(buf2, "nextFree:%p", playerProjectiles->nextFree);
-        sprintf(buf3, "arrEnd:%p", playerProjectiles->arrEnd);
 
         mouseRay = GetMouseRay(GetMousePosition(), camera);
         mouseWorldPosition = GetMouseWorldPosition(&mouseRay);
-        UpdateProjectilePosition(playerProjectiles);
         // UpdatePlayer();
 
         if (IsKeyDown(KEY_D)) cubePosition.x -= 1;
@@ -69,16 +71,23 @@ int main()
         if (IsKeyDown(KEY_W)) cubePosition.z += 1;
         else if (IsKeyDown(KEY_S)) cubePosition.z -= 1;
         if (IsKeyPressed(KEY_SPACE)) cubePosition = (Vector3) { 0.0f, 1.0f, 0.0f};
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
             Vector3 projectileDirection = Vector3Subtract(mouseWorldPosition, cubePosition);
             NewProjectile(playerProjectiles, Vector3Add(cubePosition, Vector3Scale(Vector3Normalize(projectileDirection), 1.0f)), projectileDirection);
         } 
         if (IsKeyPressed(KEY_R)) DeleteAllProjectiles(playerProjectiles);
 
-        CheckProjectileCollision(playerProjectiles);
+        /*
+        gettimeofday(&end, 0);
+        deltatime = end.tv_usec - begin.tv_usec;
+        timecounter += deltatime*1e-6;
+        */
 
+        UpdateProjectilePosition(playerProjectiles);
+        CheckProjectileCollision(playerProjectiles);
         UpdateDrawFrame(playerProjectiles, test_arena);
+
     }
 
     // De-Initialization
@@ -110,7 +119,7 @@ static void UpdateDrawFrame(ProjectilePool *p, Arena *a)
             DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
             DrawGrid(50, 2.0f);
             DrawArena(a);
-            DrawProjectiles(p);           
+            DrawProjectiles(p);      
 
         EndMode3D();
 
