@@ -2,6 +2,7 @@
 #include "raymath.h"
 #include "projectiles.h"
 #include "arena.h"
+#include "game.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
@@ -46,54 +47,50 @@ int main()
     camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
     camera.fovy = 45.0f;
     camera.projection = CAMERA_ORTHOGRAPHIC;
-    ProjectilePool *playerProjectiles = PoolCtor(MAX_PROJECTILES);
-    Arena* test_arena = ArenaCtor(78, 50, 2.0f);
-    struct timeval begin, end;
-    long deltatime = 0.0f;
-    long timecounter = 0.0f;
+    
+    Game_t *testLevel = LevelInit();
+
 
     //--------------------------------------------------------------------------------------
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
     // Main game loop
-    gettimeofday(&begin, 0);
-    while (!WindowShouldClose())    // Detect window close button or ESC key
+    if (testLevel)
     {
-        sprintf(buf1, "actives: %d", playerProjectiles->actives);
-
-        mouseRay = GetMouseRay(GetMousePosition(), camera);
-        mouseWorldPosition = GetMouseWorldPosition(&mouseRay);
-        // UpdatePlayer();
-
-        if (IsKeyDown(KEY_D)) cubePosition.x -= 1;
-        else if (IsKeyDown(KEY_A)) cubePosition.x += 1;
-        if (IsKeyDown(KEY_W)) cubePosition.z += 1;
-        else if (IsKeyDown(KEY_S)) cubePosition.z -= 1;
-        if (IsKeyPressed(KEY_SPACE)) cubePosition = (Vector3) { 0.0f, 1.0f, 0.0f};
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        while (!WindowShouldClose())    // Detect window close button or ESC key
         {
-            Vector3 projectileDirection = Vector3Subtract(mouseWorldPosition, cubePosition);
-            NewProjectile(playerProjectiles, Vector3Add(cubePosition, Vector3Scale(Vector3Normalize(projectileDirection), 1.0f)), projectileDirection);
-        } 
-        if (IsKeyPressed(KEY_R)) DeleteAllProjectiles(playerProjectiles);
+            mouseRay = GetMouseRay(GetMousePosition(), camera);
+            mouseWorldPosition = GetMouseWorldPosition(&mouseRay);
+            // UpdatePlayer();
 
-        /*
-        gettimeofday(&end, 0);
-        deltatime = end.tv_usec - begin.tv_usec;
-        timecounter += deltatime*1e-6;
-        */
+            if (IsKeyDown(KEY_D)) cubePosition.x -= 1;
+            else if (IsKeyDown(KEY_A)) cubePosition.x += 1;
+            if (IsKeyDown(KEY_W)) cubePosition.z += 1;
+            else if (IsKeyDown(KEY_S)) cubePosition.z -= 1;
+            if (IsKeyPressed(KEY_SPACE)) cubePosition = (Vector3) { 0.0f, 1.0f, 0.0f};
+            if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+            {
+                Vector3 projectileDirection = Vector3Subtract(mouseWorldPosition, cubePosition);
+                NewProjectile(testLevel->projectiles, Vector3Add(cubePosition, Vector3Scale(Vector3Normalize(projectileDirection), 1.0f)), projectileDirection);
+            } 
+            if (IsKeyPressed(KEY_R)) DeleteAllProjectiles(testLevel->projectiles);
 
-        UpdateProjectilePosition(playerProjectiles);
-        CheckProjectileCollision(playerProjectiles);
-        UpdateDrawFrame(playerProjectiles, test_arena);
+            /*
+            gettimeofday(&end, 0);
+            deltatime = end.tv_usec - begin.tv_usec;
+            timecounter += deltatime*1e-6;
+            */
 
+            UpdateProjectilePosition(testLevel->projectiles);
+            CheckProjectileCollision(testLevel->projectiles);
+            UpdateDrawFrame(testLevel->projectiles, testLevel->arena);
+        }
     }
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    PoolDtor(playerProjectiles);
-    ArenaDtor(test_arena);
+    LevelStop(testLevel);
     CloseWindow();                  // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 

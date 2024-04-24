@@ -1,11 +1,11 @@
-#include "include/projectiles.h"
+#include "projectiles.h"
 #include <math.h>
 
-//  allocates a projectile pool of given size
-ProjectilePool *PoolCtor(int size)
+//  allocates a Projectile_t pool of given size
+ProjectilePool *ProjectilePoolCtor(int size)
 {
     ProjectilePool *newPool = (ProjectilePool*) malloc(sizeof(ProjectilePool));
-    newPool->pool = (Projectile*) malloc(sizeof(Projectile) * size);
+    newPool->pool = (Projectile_t*) malloc(sizeof(Projectile_t) * size);
     newPool->size = size;
     newPool->nextFree = newPool->pool;
     newPool->arrEnd = newPool->pool + (size-1);
@@ -18,7 +18,7 @@ ProjectilePool *PoolCtor(int size)
     return newPool;
 }
 
-//  creates new Projectile if there is a free position in the array
+//  creates new Projectile_t if there is a free position in the array
 void NewProjectile(ProjectilePool *pool, Vector3 position, Vector3 direction)
 {
     if (pool->nextFree != NULL)
@@ -41,13 +41,13 @@ void NewProjectile(ProjectilePool *pool, Vector3 position, Vector3 direction)
     }
 }
 
-void PoolDtor(ProjectilePool* pool)
+void ProjectilePoolDtor(ProjectilePool* pool)
 {
     free(pool->pool);
     free(pool);
 }
 
-void DeleteProjectile(ProjectilePool *pool, Projectile *p)
+void DeleteProjectile(ProjectilePool *pool, Projectile_t *p)
 {
     p->active = '0';
     p->lives = 0;

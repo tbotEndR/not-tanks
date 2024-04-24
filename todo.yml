@@ -1,6 +1,9 @@
 TODO:
  - map drawing offset isn't working ✔
  - bullets ricochet off walls ✔
+ - projectile pool ctor should take tank pool as argument to determine max bullets needed
+ - same for mines
+ - datastructure that tracks obstacles, bullets, tanks and mines for quad tree
  - bullet collisions despawn both bullets
  - bullets ricochet off random arena blocks
  - time step
