@@ -1,16 +1,17 @@
-#include "game.h"
+#include "level.h"
 
 //  read level data from somewhere and initialize accordingly, for now hardcoded
-Game_t *LevelInit()
+Level_t *LevelInit()
 {
-    Game_t *newGame = (Game_t*) malloc(sizeof(Game_t));
+    Level_t *newGame = (Level_t*) malloc(sizeof(Level_t));
     newGame->tanks = TankPoolCtor(5);
     newGame->projectiles = ProjectilePoolCtor(50);
+    newGame->mines = MinePoolCtor(10);
     newGame->arena = ArenaCtor(78, 50, 2.0f);
     return newGame;
 }
 
-void LevelStop(Game_t *g)
+void LevelStop(Level_t *g)
 {
     TankPoolDtor(g->tanks);
     ProjectilePoolDtor(g->projectiles);

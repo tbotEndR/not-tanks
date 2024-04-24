@@ -1,16 +1,17 @@
-#ifndef GAME_H
-#define GAME_H
+#ifndef LEVEL_H
+#define LEVEL
 #include "arena.h"
 #include "projectiles.h"
 #include "tanks.h"
 
-typedef struct Game_t {
+typedef struct Level_t {
     TankPool *tanks;
     ProjectilePool *projectiles;
+    MinePool *mines;
     Arena *arena;
-} Game_t;
+} Level_t;
 
-Game_t *LevelInit();
-void LevelStop(Game_t *g);
+Level_t *LevelInit();
+void LevelStop(Level_t *g);
 
 #endif

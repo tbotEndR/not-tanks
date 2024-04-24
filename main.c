@@ -2,11 +2,10 @@
 #include "raymath.h"
 #include "projectiles.h"
 #include "arena.h"
-#include "game.h"
+#include "level.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
-#define MAX_PROJECTILES 500
 
 //----------------------------------------------------------------------------------
 // Local Variables Definition (local to this module)
@@ -27,7 +26,7 @@ char buf3[50];
 //----------------------------------------------------------------------------------
 // Local Functions Declaration
 //----------------------------------------------------------------------------------
-static void UpdateDrawFrame(ProjectilePool *p, Arena *a);          // this is terrible, fix it pls
+static void UpdateDrawFrame(ProjectilePool *p, Arena *a, MinePool *m);          // this is terrible, fix it pls
 Vector3 GetMouseWorldPosition(Ray *mouseRay);
 
 //----------------------------------------------------------------------------------
@@ -48,7 +47,7 @@ int main()
     camera.fovy = 45.0f;
     camera.projection = CAMERA_ORTHOGRAPHIC;
     
-    Game_t *testLevel = LevelInit();
+    Level_t *testLevel = LevelInit();
 
 
     //--------------------------------------------------------------------------------------
@@ -69,28 +68,30 @@ int main()
             if (IsKeyDown(KEY_W)) cubePosition.z += 1;
             else if (IsKeyDown(KEY_S)) cubePosition.z -= 1;
             if (IsKeyPressed(KEY_SPACE)) cubePosition = (Vector3) { 0.0f, 1.0f, 0.0f};
-            if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
                 Vector3 projectileDirection = Vector3Subtract(mouseWorldPosition, cubePosition);
                 NewProjectile(testLevel->projectiles, Vector3Add(cubePosition, Vector3Scale(Vector3Normalize(projectileDirection), 1.0f)), projectileDirection);
             } 
-            if (IsKeyPressed(KEY_R)) DeleteAllProjectiles(testLevel->projectiles);
-
-            /*
-            gettimeofday(&end, 0);
-            deltatime = end.tv_usec - begin.tv_usec;
-            timecounter += deltatime*1e-6;
-            */
+            if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+            {
+                NewMine(testLevel->mines, cubePosition);
+            }
+            if (IsKeyPressed(KEY_R))
+            {
+                DeleteAllProjectiles(testLevel->projectiles);
+                DeleteAllMines(testLevel->mines);
+            }
 
             UpdateProjectilePosition(testLevel->projectiles);
             CheckProjectileCollision(testLevel->projectiles);
-            UpdateDrawFrame(testLevel->projectiles, testLevel->arena);
+            UpdateDrawFrame(testLevel->projectiles, testLevel->arena, testLevel->mines);
         }
     }
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    LevelStop(testLevel);
+    LevelStop(testLevel);           // uninitialize level and data
     CloseWindow();                  // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
@@ -98,7 +99,7 @@ int main()
 }
 
 // Update and draw game frame
-static void UpdateDrawFrame(ProjectilePool *p, Arena *a)
+static void UpdateDrawFrame(ProjectilePool *p, Arena *a, MinePool *m)
 {
     // Update
     //----------------------------------------------------------------------------------
@@ -116,7 +117,8 @@ static void UpdateDrawFrame(ProjectilePool *p, Arena *a)
             DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
             DrawGrid(50, 2.0f);
             DrawArena(a);
-            DrawProjectiles(p);      
+            DrawProjectiles(p);     
+            DrawMines(m); 
 
         EndMode3D();
 

@@ -14,6 +14,7 @@ ProjectilePool *ProjectilePoolCtor(int size)
     {
         newPool->pool[i].active = '0';
         newPool->pool[i].lives = 0;
+        newPool->pool[i].size = 1.0f;
     }
     return newPool;
 }
@@ -118,6 +119,76 @@ void DrawProjectiles(ProjectilePool *pool)
             DrawCube(pool->pool[i].position, 0.3f, 0.3f, 0.3f, LIGHTGRAY);
             DrawCubeWires(pool->pool[i].position, 0.3f, 0.3f, 0.3f, RED);
 
+            counter++;
+        }
+    }
+}
+
+//  yes all of this is mostly identical to projectiles, I'll figure out a cleaner way to do this in the future
+
+MinePool *MinePoolCtor(int size)
+{
+    MinePool *newPool = (MinePool*) malloc(sizeof(MinePool));
+    newPool->pool = (Mine_t*) malloc(sizeof(Mine_t) * size);
+    newPool->size = size;
+    newPool->nextFree = newPool->pool;
+    newPool->arrEnd = newPool->pool + (size-1);
+    newPool->actives = 0;
+    for (int i = 0; i < size; i++)
+    {
+        newPool->pool[i].active = '0';
+        newPool->pool[i].countdown = 10.0;
+        newPool->pool[i].size = 1.0f;
+    }
+    return newPool;
+}
+
+void MinePoolDtor(MinePool *pool)
+{
+    free(pool->pool);
+    free(pool);
+}
+
+void NewMine(MinePool *pool, Vector3 position)
+{
+    if (pool->nextFree != NULL)
+    {
+        pool->nextFree->active = '1';
+        pool->nextFree->countdown = 10.0;
+        pool->nextFree->position = position;
+        pool->actives++;
+        do
+        {
+            (pool->nextFree)++;
+            if (pool->nextFree > pool->arrEnd) 
+            {
+                pool->nextFree = NULL;
+                break;
+            }
+             
+        } while (pool->nextFree->active != '0');
+    }
+}
+void DeleteMine(MinePool *pool, Mine_t *m)
+{
+    m->active = '0';
+    pool->actives--;
+    if ((m < pool->nextFree) || (pool->nextFree == NULL)) pool->nextFree = m;
+}
+void DeleteAllMines(MinePool *pool)
+{
+    for (int i = 0; i < pool->size; i++)
+    {
+        if (pool->pool[i].active == '1') DeleteMine(pool, &(pool->pool[i]));
+    }
+}
+void DrawMines(MinePool *pool)
+{
+    for (int i = 0, counter = 0; (i < pool->size) && (counter < pool->actives); i++)
+    {
+        if (pool->pool[i].active == '1') 
+        {
+            DrawSphere(pool->pool[i].position, pool->pool[i].size, RED);
             counter++;
         }
     }

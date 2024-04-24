@@ -27,6 +27,14 @@ typedef struct ProjectilePool{
     Projectile_t *arrEnd;
 } ProjectilePool;
 
+typedef struct MinePool{
+    int size;
+    int actives;
+    Mine_t *pool;
+    Mine_t *nextFree;
+    Mine_t *arrEnd;
+} MinePool;
+
 ProjectilePool *ProjectilePoolCtor(int size);
 void ProjectilePoolDtor(ProjectilePool* pool);
 void NewProjectile(ProjectilePool *pool, Vector3 position, Vector3 direction);
@@ -35,5 +43,12 @@ void DeleteAllProjectiles(ProjectilePool *pool);
 void UpdateProjectilePosition(ProjectilePool *pool);
 void CheckProjectileCollision(ProjectilePool *pool);
 void DrawProjectiles(ProjectilePool *pool);
+
+MinePool *MinePoolCtor(int size);
+void MinePoolDtor(MinePool *pool);
+void NewMine(MinePool *pool, Vector3 position);
+void DeleteMine(MinePool *pool, Mine_t *m);
+void DeleteAllMines(MinePool *pool);
+void DrawMines(MinePool *pool);
 
 #endif
