@@ -1,5 +1,6 @@
 #include "projectiles.h"
 #include <math.h>
+#include <profileapi.h>
 
 //  allocates a Projectile_t pool of given size
 ProjectilePool *ProjectilePoolCtor(int size)
@@ -137,7 +138,7 @@ MinePool *MinePoolCtor(int size)
     for (int i = 0; i < size; i++)
     {
         newPool->pool[i].active = '0';
-        newPool->pool[i].countdown = 10.0;
+        newPool->pool[i].endTime = 0.0;
         newPool->pool[i].size = 1.0f;
     }
     return newPool;
@@ -153,8 +154,12 @@ void NewMine(MinePool *pool, Vector3 position)
 {
     if (pool->nextFree != NULL)
     {
+        LARGE_INTEGER t1, freq;
+        QueryPerformanceFrequency(&freq);
+        QueryPerformanceCounter(&t1);
+
         pool->nextFree->active = '1';
-        pool->nextFree->countdown = 10.0;
+        pool->nextFree->endTime = t1.QuadPart / freq.QuadPart + 10.0;
         pool->nextFree->position = position;
         pool->actives++;
         do
@@ -190,6 +195,20 @@ void DrawMines(MinePool *pool)
         {
             DrawSphere(pool->pool[i].position, pool->pool[i].size, RED);
             counter++;
+        }
+    }
+}
+
+void CheckMineTimers(MinePool *pool)
+{
+    LARGE_INTEGER t1, freq;
+    QueryPerformanceFrequency(&freq);
+    QueryPerformanceCounter(&t1);
+    for (int i = 0, counter = 0; (i < pool->size) && (counter < pool->actives); i++)
+    {
+        if (pool->pool[i].active == '1') 
+        {
+            if (pool->pool[i].endTime <= t1.QuadPart/freq.QuadPart) DeleteMine(pool, &(pool->pool[i]));
         }
     }
 }

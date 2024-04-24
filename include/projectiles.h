@@ -14,7 +14,7 @@ typedef struct Projectile_t{
 
 typedef struct Mine_t {
     Vector3 position;
-    time_t countdown;
+    double endTime;
     float size;
     char active;
 } Mine_t;
@@ -49,6 +49,7 @@ void MinePoolDtor(MinePool *pool);
 void NewMine(MinePool *pool, Vector3 position);
 void DeleteMine(MinePool *pool, Mine_t *m);
 void DeleteAllMines(MinePool *pool);
+void CheckMineTimers(MinePool *pool);
 void DrawMines(MinePool *pool);
 
 #endif

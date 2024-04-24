@@ -5,7 +5,7 @@
 #include "level.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
+#include <profileapi.h>
 
 //----------------------------------------------------------------------------------
 // Local Variables Definition (local to this module)
@@ -36,6 +36,11 @@ int main()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER t1, t2;
+    QueryPerformanceFrequency(&frequency);
+    double elapsed;
+
     const int screenWidth = 1280;
     const int screenHeight = 720;
 
@@ -49,7 +54,6 @@ int main()
     
     Level_t *testLevel = LevelInit();
 
-
     //--------------------------------------------------------------------------------------
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -57,6 +61,7 @@ int main()
     // Main game loop
     if (testLevel)
     {
+        QueryPerformanceCounter(&t1);
         while (!WindowShouldClose())    // Detect window close button or ESC key
         {
             mouseRay = GetMouseRay(GetMousePosition(), camera);
@@ -85,7 +90,12 @@ int main()
 
             UpdateProjectilePosition(testLevel->projectiles);
             CheckProjectileCollision(testLevel->projectiles);
+            CheckMineTimers(testLevel->mines);
             UpdateDrawFrame(testLevel->projectiles, testLevel->arena, testLevel->mines);
+
+            QueryPerformanceCounter(&t2);
+            elapsed = (t2.QuadPart - t1.QuadPart) * 1000.0 / (double)frequency.QuadPart; // in ms
+            sprintf(buf1, "Game time: %.2fs", elapsed/1000.0);
         }
     }
 
