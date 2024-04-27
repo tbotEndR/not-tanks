@@ -1,106 +1,74 @@
 #include "projectiles.h"
+#include "mempool.h"
 #include <math.h>
 #include <profileapi.h>
 
-//  allocates a Projectile_t pool of given size
-ProjectilePool *ProjectilePoolCtor(int size)
-{
-    ProjectilePool *newPool = (ProjectilePool*) malloc(sizeof(ProjectilePool));
-    newPool->pool = (Projectile_t*) malloc(sizeof(Projectile_t) * size);
-    newPool->size = size;
-    newPool->nextFree = newPool->pool;
-    newPool->arrEnd = newPool->pool + (size-1);
-    newPool->actives = 0;
-    for (int i = 0; i < size; i++)
-    {
-        newPool->pool[i].active = '0';
-        newPool->pool[i].lives = 0;
-        newPool->pool[i].size = 1.0f;
-    }
-    return newPool;
-}
-
 //  creates new Projectile_t if there is a free position in the array
-void NewProjectile(ProjectilePool *pool, Vector3 position, Vector3 direction)
+void NewProjectile(MemoryPool_t *pool, Vector3 position, Vector3 direction)
 {
-    if (pool->nextFree != NULL)
+    Projectile_t* newProjectile = (Projectile_t*) AllocBlock(pool);
+    if (newProjectile != NULL)
     {
-        pool->nextFree->active = '1';
-        pool->nextFree->lives = 2;
-        pool->nextFree->direction = Vector3Scale(Vector3Normalize(direction), 0.1f);
-        pool->nextFree->position = position;
+        newProjectile->active = '1';
+        newProjectile->lives = 2;
+        newProjectile->direction = Vector3Scale(Vector3Normalize(direction), 0.1f);
+        newProjectile->position = position;
         pool->actives++;
-        do
-        {
-            (pool->nextFree)++;
-            if (pool->nextFree > pool->arrEnd) 
-            {
-                pool->nextFree = NULL;
-                break;
-            }
-             
-        } while (pool->nextFree->active != '0');
     }
 }
 
-void ProjectilePoolDtor(ProjectilePool* pool)
-{
-    free(pool->pool);
-    free(pool);
-}
-
-void DeleteProjectile(ProjectilePool *pool, Projectile_t *p)
+void DeleteProjectile(MemoryPool_t *pool, Projectile_t *p)
 {
     p->active = '0';
     p->lives = 0;
     pool->actives--;
-    if ((p < pool->nextFree) || (pool->nextFree == NULL)) pool->nextFree = p;
+    if ((p < (Projectile_t*)pool->nextFree) || (pool->nextFree == NULL)) pool->nextFree = p;
 }
 
-void DeleteAllProjectiles(ProjectilePool *pool)
+void DeleteAllProjectiles(MemoryPool_t *pool)
 {
-    for (int i = 0; i < pool->size; i++)
+    for (int i = 0; i < pool->poolSize; i++)
     {
-        if (pool->pool[i].active == '1') DeleteProjectile(pool, &(pool->pool[i]));
+        if (((Projectile_t*)pool)[i].active == '1') DeleteProjectile(pool, &((Projectile_t*)pool->pool)[i]);
     }
 }
 
-void UpdateProjectilePosition(ProjectilePool *pool)
+void UpdateProjectilePosition(MemoryPool_t *pool)
 {
-    for (int i = 0, counter = 0; (i < pool->size) && (counter < pool->actives); i++)
+    for (int i = 0, counter = 0; (i < pool->poolSize) && (counter < pool->actives); i++)
     {
         if (counter >= pool->actives) break;
-        if (pool->pool[i].active == '1')
+        if (((Projectile_t*)pool)[i].active == '1')
         {
-            pool->pool[i].position = Vector3Add(pool->pool[i].position, pool->pool[i].direction);
+            ((Projectile_t*)pool)[i].position = Vector3Add(((Projectile_t*)pool)[i].position, ((Projectile_t*)pool)[i].direction);
             counter++;
         } 
     }
 }
 
-void CheckProjectileCollision(ProjectilePool *pool)
+void CheckProjectileCollision(MemoryPool_t *pool)
 {
-    for (int i = 0, counter = 0; (i < pool->size) && (counter < pool->actives); i++)
+    for (int i = 0, counter = 0; (i < pool->poolSize) && (counter < pool->actives); i++)
     {
-        if (pool->pool[i].active == '1') 
+        if (((Projectile_t*)pool)[i].active == '1') 
         {
             // rudimentary check for wall collision and ricochet
-            if ((pool->pool[i].position.x >= 38.0f) || (pool->pool[i].position.x <= -38.0f)) 
+            if ((((Projectile_t*)pool)[i].position.x >= 38.0f) || (((Projectile_t*)pool)[i].position.x <= -38.0f)) 
             {
-                if (pool->pool[i].lives == 1) DeleteProjectile(pool, &pool->pool[i]);
+                if (((Projectile_t*)pool)[i].lives == 1) DeleteProjectile(pool, &((Projectile_t*)pool->pool)[i]);
                 else
                 {   
-                    pool->pool[i].direction.x *= -1;
-                    pool->pool[i].lives--;
+                    ((Projectile_t*)pool)[i].direction.x *= -1;
+                    ((Projectile_t*)pool)[i].lives--;
                 }
             }
-            if ((pool->pool[i].position.z >= 24.0f) || (pool->pool[i].position.z <= -24.0f)) 
+            if ((((Projectile_t*)pool)[i].position.z >= 24.0f) || (((Projectile_t*)pool)[i].position.z <= -24.0f)) 
             {
-                if (pool->pool[i].lives == 1) DeleteProjectile(pool, &pool->pool[i]);
+                if (((Projectile_t*)pool)[i].lives == 1) DeleteProjectile(pool, &((Projectile_t*)pool->pool)[i]);
                 else
                 {   
-                    pool->pool[i].direction.z *= -1;
-                    pool->pool[i].lives--;
+                    ((Projectile_t*)pool)[i].direction.z *= -1;
+                    ((Projectile_t*)pool)[i].lives--;
                 }
             }
 
@@ -110,47 +78,22 @@ void CheckProjectileCollision(ProjectilePool *pool)
     }
 }
 
-void DrawProjectiles(ProjectilePool *pool)
+void DrawProjectiles(MemoryPool_t *pool)
 {
-    for (int i = 0, counter = 0; (i < pool->size) && (counter < pool->actives); i++)
+    for (int i = 0, counter = 0; (i < pool->poolSize) && (counter < pool->actives); i++)
     {
-        if (pool->pool[i].active == '1') 
+        if (((Projectile_t*)pool)[i].active == '1') 
         {
             //DrawSphere(pool->pool[i].position, 0.3f, LIGHTGRAY);
-            DrawCube(pool->pool[i].position, 0.3f, 0.3f, 0.3f, LIGHTGRAY);
-            DrawCubeWires(pool->pool[i].position, 0.3f, 0.3f, 0.3f, RED);
+            DrawCube(((Projectile_t*)pool)[i].position, 0.3f, 0.3f, 0.3f, LIGHTGRAY);
+            DrawCubeWires(((Projectile_t*)pool)[i].position, 0.3f, 0.3f, 0.3f, RED);
 
             counter++;
         }
     }
 }
 
-//  yes all of this is mostly identical to projectiles, I'll figure out a cleaner way to do this in the future
-
-MinePool *MinePoolCtor(int size)
-{
-    MinePool *newPool = (MinePool*) malloc(sizeof(MinePool));
-    newPool->pool = (Mine_t*) malloc(sizeof(Mine_t) * size);
-    newPool->size = size;
-    newPool->nextFree = newPool->pool;
-    newPool->arrEnd = newPool->pool + (size-1);
-    newPool->actives = 0;
-    for (int i = 0; i < size; i++)
-    {
-        newPool->pool[i].active = '0';
-        newPool->pool[i].endTime = 0.0;
-        newPool->pool[i].size = 1.0f;
-    }
-    return newPool;
-}
-
-void MinePoolDtor(MinePool *pool)
-{
-    free(pool->pool);
-    free(pool);
-}
-
-void NewMine(MinePool *pool, Vector3 position)
+void NewMine(MemoryPool_t *pool, Vector3 position)
 {
     if (pool->nextFree != NULL)
     {
@@ -158,9 +101,9 @@ void NewMine(MinePool *pool, Vector3 position)
         QueryPerformanceFrequency(&freq);
         QueryPerformanceCounter(&t1);
 
-        pool->nextFree->active = '1';
-        pool->nextFree->endTime = t1.QuadPart / freq.QuadPart + 10.0;
-        pool->nextFree->position = position;
+        ((Mine_t*)pool->nextFree)->active = '1';
+        ((Mine_t*)pool->nextFree)->endTime = t1.QuadPart / freq.QuadPart + 10.0;
+        ((Mine_t*)pool->nextFree)->position = position;
         pool->actives++;
         do
         {
@@ -171,44 +114,45 @@ void NewMine(MinePool *pool, Vector3 position)
                 break;
             }
              
-        } while (pool->nextFree->active != '0');
+        } while (((Mine_t*)pool->nextFree)->active != '0');
     }
 }
-void DeleteMine(MinePool *pool, Mine_t *m)
+
+void DeleteMine(MemoryPool_t *pool, Mine_t *m)
 {
     m->active = '0';
     pool->actives--;
-    if ((m < pool->nextFree) || (pool->nextFree == NULL)) pool->nextFree = m;
+    if ((m < (Mine_t*)pool->nextFree) || (pool->nextFree == NULL)) pool->nextFree = m;
 }
-void DeleteAllMines(MinePool *pool)
+void DeleteAllMines(MemoryPool_t *pool)
 {
-    for (int i = 0; i < pool->size; i++)
+    for (int i = 0; i < pool->poolSize; i++)
     {
-        if (pool->pool[i].active == '1') DeleteMine(pool, &(pool->pool[i]));
+        if (((Mine_t*)pool->pool)[i].active == '1') DeleteMine(pool, &((Mine_t*)pool->pool)[i]);
     }
 }
-void DrawMines(MinePool *pool)
+void DrawMines(MemoryPool_t *pool)
 {
-    for (int i = 0, counter = 0; (i < pool->size) && (counter < pool->actives); i++)
+    for (int i = 0, counter = 0; (i < pool->poolSize) && (counter < pool->actives); i++)
     {
-        if (pool->pool[i].active == '1') 
+        if (((Mine_t*)pool->pool)[i].active == '1') 
         {
-            DrawSphere(pool->pool[i].position, pool->pool[i].size, RED);
+            DrawSphere(((Mine_t*)pool->pool)[i].position, ((Mine_t*)pool->pool)[i].size, RED);
             counter++;
         }
     }
 }
 
-void CheckMineTimers(MinePool *pool)
+void CheckMineTimers(MemoryPool_t *pool)
 {
     LARGE_INTEGER t1, freq;
     QueryPerformanceFrequency(&freq);
     QueryPerformanceCounter(&t1);
-    for (int i = 0, counter = 0; (i < pool->size) && (counter < pool->actives); i++)
+    for (int i = 0, counter = 0; (i < pool->poolSize) && (counter < pool->actives); i++)
     {
-        if (pool->pool[i].active == '1') 
+        if (((Mine_t*)pool->pool)[i].active == '1') 
         {
-            if (pool->pool[i].endTime <= t1.QuadPart/freq.QuadPart) DeleteMine(pool, &(pool->pool[i]));
+            if (((Mine_t*)pool->pool)[i].endTime <= t1.QuadPart/freq.QuadPart) DeleteMine(pool, &((Mine_t*)pool->pool)[i]);
         }
     }
 }
