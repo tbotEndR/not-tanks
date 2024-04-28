@@ -1,12 +1,19 @@
 #include "mempool.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
-MemoryPool_t *AllocPool(int blockSize, int n)
+MemoryPool_t *AllocPool(size_t blockSize, int n)
 {
     MemoryPool_t *newPool = (MemoryPool_t*) malloc(sizeof(MemoryPool_t));
     newPool->pool = (void*) malloc(blockSize * n);
-    newPool->nextList = StackCtor(n);
+    char* poolCursor = newPool->pool;
+    int fourByteBlocks = (n * blockSize) / 4;
+    for (int i = 0; i < fourByteBlocks; i++)
+    {
+        poolCursor[i] = NULL;
+    }
+    newPool->nextFrees = StackCtor(n);
     newPool->blockSize = blockSize;
     newPool->blocks = n;
     return newPool;
@@ -15,34 +22,34 @@ MemoryPool_t *AllocPool(int blockSize, int n)
 void FreePool(MemoryPool_t *mp)
 {
     free(mp->pool);
-    StackDtor(mp->nextList);
+    StackDtor(mp->nextFrees);
     free(mp);
 }
 
 void *AllocBlock(MemoryPool_t *mp)
 {
-    int nextFree = mp->nextList->stack[mp->nextList->top];
+    int nextFree = mp->nextFrees->stack[mp->nextFrees->top];
     if (nextFree != -1)
     {
-        void *newBlock = mp->pool + mp->blockSize * nextFree;
-        Pop(mp->nextList);
+        void *newBlock = (intptr_t)mp->pool + mp->blockSize * nextFree;
+        Pop(mp->nextFrees);
         return newBlock;
     }
+    else return NULL;
 }
 
-void FreeBlock(void *block, MemoryPool_t *mp)
+void FreeBlock(void **block, MemoryPool_t *mp)
 {
-    int blockIndex = (block - mp->pool) / mp->blockSize;
-    block = (void*) NULL;
-    Push(mp->nextList, blockIndex);
-}
-
-void PrintPool(MemoryPool_t *mp)
-{
-    for (int i = 0; i < mp->blocks; i++)
+    int blockIndex = ((intptr_t)*block - (intptr_t)mp->pool) / mp->blockSize;
+    char* blockStart = *block;
+    for (int i = 0; i < mp->blockSize; i+=4)
     {
-        printf("Block %d: [ 0x%x ]\n", i, mp->pool + mp->blockSize * i);
+        blockStart += i;
+        *blockStart = NULL;
+        printf("writing NULL to 0x%x\n", blockStart);
     }
+    *block = NULL;
+    Push(mp->nextFrees, blockIndex);
 }
 
 Stack_t *StackCtor(int size)
@@ -51,7 +58,7 @@ Stack_t *StackCtor(int size)
     newStack->stack = (int*) malloc(sizeof(int)*size);
     for (int i = 0; i < size; i++)
     {
-        newStack->stack[i] = i;
+        newStack->stack[i] = size-1-i;
     }
     newStack->top = size-1;
     newStack->max = size;
@@ -79,13 +86,4 @@ void Push(Stack_t *stack, int i)
     {
         stack->stack[++stack->top] = i;
     }
-}
-
-void PrintStack(Stack_t *stack)
-{
-    for(int i = 0; i < stack->max; i++)
-    {
-        printf("[%d]:%d\n", i, stack->stack[i]);
-    }
-    printf("stack top: %d\n", stack->top);
 }
