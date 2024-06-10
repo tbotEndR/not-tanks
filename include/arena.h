@@ -1,7 +1,7 @@
 #ifndef ARENA_H
 #define ARENA_H
 #define CELLSIZE 2
-#include <raylib.h>
+#include "raylib.h"
 
 enum Celltype {EMPTY, WALL_SOLID, WALL_DEST, HOLE};
 
