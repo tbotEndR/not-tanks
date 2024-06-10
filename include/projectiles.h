@@ -2,6 +2,7 @@
 #define PROJECTILES_H
 #include "raylib.h"
 #include "raymath.h"
+#include "mempool.h"
 #include <stdlib.h>
 
 typedef struct Projectile_t{
@@ -19,37 +20,17 @@ typedef struct Mine_t {
     char active;
 } Mine_t;
 
-typedef struct ProjectilePool{
-    int size;
-    int actives;
-    Projectile_t *pool;
-    Projectile_t *nextFree;
-    Projectile_t *arrEnd;
-} ProjectilePool;
+void NewProjectile(MemoryPool_t *pool, Vector3 position, Vector3 direction);
+void DeleteProjectile(MemoryPool_t *pool, Projectile_t *p);
+void DeleteAllProjectiles(MemoryPool_t *pool);
+void UpdateProjectilePosition(MemoryPool_t *pool);
+void CheckProjectileCollision(MemoryPool_t *pool);
+void DrawProjectiles(MemoryPool_t *pool);
 
-typedef struct MinePool{
-    int size;
-    int actives;
-    Mine_t *pool;
-    Mine_t *nextFree;
-    Mine_t *arrEnd;
-} MinePool;
-
-ProjectilePool *ProjectilePoolCtor(int size);
-void ProjectilePoolDtor(ProjectilePool* pool);
-void NewProjectile(ProjectilePool *pool, Vector3 position, Vector3 direction);
-void DeleteProjectile(ProjectilePool *pool, Projectile_t *p);
-void DeleteAllProjectiles(ProjectilePool *pool);
-void UpdateProjectilePosition(ProjectilePool *pool);
-void CheckProjectileCollision(ProjectilePool *pool);
-void DrawProjectiles(ProjectilePool *pool);
-
-MinePool *MinePoolCtor(int size);
-void MinePoolDtor(MinePool *pool);
-void NewMine(MinePool *pool, Vector3 position);
-void DeleteMine(MinePool *pool, Mine_t *m);
-void DeleteAllMines(MinePool *pool);
-void CheckMineTimers(MinePool *pool);
-void DrawMines(MinePool *pool);
+void NewMine(MemoryPool_t *pool, Vector3 position);
+void DeleteMine(MemoryPool_t *pool, Mine_t *m);
+void DeleteAllMines(MemoryPool_t *pool);
+void CheckMineTimers(MemoryPool_t *pool);
+void DrawMines(MemoryPool_t *pool);
 
 #endif

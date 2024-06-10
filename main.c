@@ -26,7 +26,7 @@ char buf3[50];
 //----------------------------------------------------------------------------------
 // Local Functions Declaration
 //----------------------------------------------------------------------------------
-static void UpdateDrawFrame(ProjectilePool *p, Arena *a, MinePool *m);          // this is terrible, fix it pls
+static void UpdateDrawFrame(Level_t *level);          
 Vector3 GetMouseWorldPosition(Ray *mouseRay);
 
 //----------------------------------------------------------------------------------
@@ -40,6 +40,8 @@ int main()
     LARGE_INTEGER t1, t2;
     QueryPerformanceFrequency(&frequency);
     double elapsed;
+
+    float deltaTime;
 
     const int screenWidth = 1280;
     const int screenHeight = 720;
@@ -62,16 +64,20 @@ int main()
     if (testLevel)
     {
         QueryPerformanceCounter(&t1);
+        sprintf(buf3, "Projectile debugging: %p | %d", testLevel->projectiles->nextFree, testLevel->projectiles->actives);
+        sprintf(buf2, "sizeof projectile_t, mine_t: %d | %d", testLevel->projectiles->blockSize, testLevel->mines->blockSize);
+
         while (!WindowShouldClose())    // Detect window close button or ESC key
         {
             mouseRay = GetMouseRay(GetMousePosition(), camera);
             mouseWorldPosition = GetMouseWorldPosition(&mouseRay);
+            deltaTime = GetFrameTime();
             // UpdatePlayer();
 
-            if (IsKeyDown(KEY_D)) cubePosition.x -= 1;
-            else if (IsKeyDown(KEY_A)) cubePosition.x += 1;
-            if (IsKeyDown(KEY_W)) cubePosition.z += 1;
-            else if (IsKeyDown(KEY_S)) cubePosition.z -= 1;
+            if (IsKeyDown(KEY_D)) cubePosition.x -= 1 * deltaTime;
+            else if (IsKeyDown(KEY_A)) cubePosition.x += 1 * deltaTime;
+            if (IsKeyDown(KEY_W)) cubePosition.z += 1 * deltaTime;
+            else if (IsKeyDown(KEY_S)) cubePosition.z -= 1 * deltaTime;
             if (IsKeyPressed(KEY_SPACE)) cubePosition = (Vector3) { 0.0f, 1.0f, 0.0f};
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
@@ -91,7 +97,7 @@ int main()
             UpdateProjectilePosition(testLevel->projectiles);
             CheckProjectileCollision(testLevel->projectiles);
             CheckMineTimers(testLevel->mines);
-            UpdateDrawFrame(testLevel->projectiles, testLevel->arena, testLevel->mines);
+            UpdateDrawFrame(testLevel);
 
             QueryPerformanceCounter(&t2);
             elapsed = (t2.QuadPart - t1.QuadPart) * 1000.0 / (double)frequency.QuadPart; // in ms
@@ -109,7 +115,7 @@ int main()
 }
 
 // Update and draw game frame
-static void UpdateDrawFrame(ProjectilePool *p, Arena *a, MinePool *m)
+static void UpdateDrawFrame(Level_t *level)
 {
     // Update
     //----------------------------------------------------------------------------------
@@ -126,9 +132,9 @@ static void UpdateDrawFrame(ProjectilePool *p, Arena *a, MinePool *m)
             DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, RED);
             DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
             DrawGrid(50, 2.0f);
-            DrawArena(a);
-            DrawProjectiles(p);     
-            DrawMines(m); 
+            DrawArena(level->arena);
+            DrawProjectiles(level->projectiles);     
+            DrawMines(level->mines); 
 
         EndMode3D();
 
