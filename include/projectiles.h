@@ -10,27 +10,27 @@ typedef struct Projectile_t{
     Vector3 direction;
     float size;
     int lives;
-    char active;
 } Projectile_t;
 
 typedef struct Mine_t {
     Vector3 position;
     double endTime;
     float size;
-    char active;
 } Mine_t;
 
-void NewProjectile(MemoryPool_t *pool, Vector3 position, Vector3 direction);
-void DeleteProjectile(MemoryPool_t *pool, Projectile_t *p);
-void DeleteAllProjectiles(MemoryPool_t *pool);
-void UpdateProjectilePosition(MemoryPool_t *pool);
-void CheckProjectileCollision(MemoryPool_t *pool);
-void DrawProjectiles(MemoryPool_t *pool);
+void NewProjectile(MemoryPool_t *projectiles, Vector3 position, Vector3 direction);
+void DeleteProjectile(MemoryPool_t *projectiles, Projectile_t *p);
+void DeleteAllProjectiles(MemoryPool_t *projectiles);
+void UpdateProjectilePosition(MemoryPool_t *projectiles);
+void CheckProjectileCollision(MemoryPool_t *projectiles);
+void DrawProjectiles(MemoryPool_t *projectiles);
 
-void NewMine(MemoryPool_t *pool, Vector3 position);
-void DeleteMine(MemoryPool_t *pool, Mine_t *m);
-void DeleteAllMines(MemoryPool_t *pool);
-void CheckMineTimers(MemoryPool_t *pool);
-void DrawMines(MemoryPool_t *pool);
+void NewMine(MemoryPool_t *mines, Vector3 position);
+void DeleteMine(MemoryPool_t *mines, Mine_t *p);
+void DeleteAllMines(MemoryPool_t *mines);
+void CheckMineCollision(MemoryPool_t *mines);
+void DrawMines(MemoryPool_t *mines);
+void CheckMineTimers(MemoryPool_t *mines);
+
 
 #endif
