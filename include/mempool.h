@@ -2,28 +2,25 @@
 #define MEMPOOL_H
 #include <stddef.h>
 
-typedef struct Stack_t {
-    int *stack;
-    int top;
-    int max;
-} Stack_t;
-
-typedef struct MemoryPool_t {
-    void *pool;
-    Stack_t *nextFrees;
-    size_t blockSize;
-    int blocks;
+typedef struct MemoryPool_t{
+    void* memory;
+    size_t block_size;
+    int active_blocks;
+    int *active_block_table;
+    int pool_size;
+    int *next_free_stack;
+    int stack_top_index;
 } MemoryPool_t;
 
-//  allocates a memory pool of n blocks of given blockSize
-MemoryPool_t *AllocPool(size_t blockSize, int n);
-void FreePool(MemoryPool_t *mp);
-void *AllocBlock(MemoryPool_t *mp);
-void FreeBlock(void **block, MemoryPool_t *mp);
+MemoryPool_t *AllocateMemoryPool(size_t blockSize, int elements);
+void DeallocateMemoryPool(MemoryPool_t *pool);
+void *AllocateBlock(MemoryPool_t *pool);
+void DeallocateBlock(void *block, MemoryPool_t *pool);
+void DeallocateAllBlocks(MemoryPool_t *pool);
+int BlockIsActive(void* block, MemoryPool_t *pool);
+int Pop(int *stack, int *stackTop);
+void Push(int *stack, int n, MemoryPool_t *pool);
 
-Stack_t *StackCtor(int size);
-void StackDtor(Stack_t *stack);
-int Pop(Stack_t *stack);
-void Push(Stack_t *stack, int i);
+void PrintMemoryPool(MemoryPool_t *pool);
 
 #endif
